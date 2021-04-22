@@ -1,99 +1,81 @@
 const database = include('/databaseConnection');
 
+function grabRecipes(callback) {
+		let sqlQuery = "SELECT recipe_id, name, description, cook_time FROM recipe";
+		database.query(sqlQuery, (err, results, fields) => {
+			if (err) {
+				callback(err, null);
+			}
+			else {
+				console.log(results);
+				callback(null, results);
+			}		
+		});
+	}
 
-function grabRestaurants(callback) {
-	let sqlQuery = "SELECT restaurant_id, name, description FROM restaurant";
-	database.query(sqlQuery, (err, results, fields) => {
-		if (err) {
-			callback(err, null);
+	function deleteRecipe(recipeID, callback) {
+			let sqlDeleteRecipe = "DELETE FROM recipe WHERE recipe_id = :revID";
+			let params = {
+				revID: recipeID
+			};
+			console.log(sqlDeleteRecipe);
+			database.query(sqlDeleteRecipe, params, (err, results, fields) => {
+				if (err) {
+					callback(err, null);
+				}
+				else {
+					console.log(results);
+					callback(null, results);
+				}
+			});
 		}
-		else {
-			console.log(results);
-			callback(null, results);
-		}		
-	});
-}
-function addReview(postData, callback) {
-	let sqlInsert = `INSERT INTO review (restaurant_id, reviewer_name, details, rating)
-						 VALUES (:restaurant_id, :reviewer_name, :details, :rating);`;
-	console.log(postData.restaurant_id);
+
+		function addRecipe(postData, callback) {
+				let sqlInsert = `INSERT INTO recipe (name, description, cook_time)
+									 VALUES (:recipe_name, :description, :cook_time);`;
+				let params = {
+					recipe_name: postData.recipe_name,
+					description: postData.description,
+					cook_time: postData.cook_time
+				};
+				console.log()
+				console.log(sqlInsert);
+				database.query(sqlInsert, params, (err, results, fields) => {
+					if (err) {
+						console.log(err);
+						callback(err, null); 
+					}
+					else {
+						console.log(results);
+						callback(null, results);
+					}
+				});
+			}
+			var revId;
+			function showIngredients(recipeID, callback) {
+					revId = recipeID;
+					let sqlQuery = `SELECT * FROM ingredient WHERE recipe_id = :revID`;
+					let params = {
+						revID: recipeID
+					};
+					database.query(sqlQuery, params, (err, results, fields) => {
+						if (err) {
+							callback(err, null);
+						}
+						else {
+							console.log(results);
+							callback(null, results);
+						}		
+					});
+				}
+
+function deleteIngredient(IngredientID, callback) {
+	let sqlDeleteIngredient = "DELETE FROM ingredient WHERE ingredient_id = :revID";
 	let params = {
-		reviewer_name : postData.reviewer_name,
-		restaurant_id: revId,
-		details: postData.details,
-		rating: postData.rating
+		revID: IngredientID
 	};
-	
-	database.query(sqlInsert, params, (err, results, fields) => {
-		if (err) {
-			console.log(err);
-			callback(err, null); 
-		}
-		else {
-			console.log(results);
-			callback(null, results);
-		}
-	});
-}
-function deleteReview(reviewId, callback) {
-	let sqlDeleteReview = "DELETE FROM review WHERE review_id = :revID";
-	let params = {
-		revID: reviewId
-	};
-	console.log(sqlDeleteReview);
-	database.query(sqlDeleteReview, params, (err, results, fields) => {
-		if (err) {
-			callback(err, null);
-		}
-		else {
-			console.log(results);
-			callback(null, results);
-		}
-	});
-}
-var revId;
-function showReviews(reviewId, callback) {
-	revId = reviewId;
-	let sqlQuery = `SELECT * FROM review WHERE restaurant_id = :revID`;
-	let params = {
-		revID: reviewId
-	};
-	database.query(sqlQuery, params, (err, results, fields) => {
-		if (err) {
-			callback(err, null);
-		}
-		else {
-			console.log(results);
-			callback(null, results);
-		}		
-	});
-}
-function addRestaurant(postData, callback) {
-	let sqlInsert = `INSERT INTO restaurant (name, description)
-						 VALUES (:restaurant_name, :description);`;
-	let params = {
-		restaurant_name: postData.restaurant_name,
-		description: postData.description,
-	};
-	console.log(sqlInsert);
-	database.query(sqlInsert, params, (err, results, fields) => {
-		if (err) {
-			console.log(err);
-			callback(err, null); 
-		}
-		else {
-			console.log(results);
-			callback(null, results);
-		}
-	});
-}
-function deleteRestaurant(restaurantId, callback) {
-	let sqlDeleteRestaurant = "DELETE FROM restaurant WHERE restaurant_id = :restID";
-	let params = {
-		restID: restaurantId
-	};
-	console.log(sqlDeleteRestaurant);
-	database.query(sqlDeleteRestaurant, params, (err, results, fields) => {
+	console.log(sqlDeleteIngredient);
+	database.query(sqlDeleteIngredient, params, (err, results, fields) => {
 		if (err) {
 			callback(err, null);
 		}
@@ -103,7 +85,32 @@ function deleteRestaurant(restaurantId, callback) {
 		}
 	});
 }
-	
 
 
-module.exports = {grabRestaurants, addRestaurant, deleteRestaurant, showReviews, deleteReview, addReview}
+function addIngredient(postData, callback) {
+		let sqlInsert = `INSERT INTO ingredient (recipe_id, name, description, quantity)
+							 VALUES (:recipe_id, :ingredient_name, :description, :quantity);`;
+		console.log("------------------------------");
+		console.log(revId);
+		console.log("------------------------------");
+		let params = {
+			ingredient_name : postData.ingredient_name,
+			recipe_id: revId,
+			description: postData.description,
+			quantity: postData.quantity
+		};
+		
+		database.query(sqlInsert, params, (err, results, fields) => {
+			if (err) {
+				console.log(err);
+				callback(err, null); 
+			}
+			else {
+				console.log(results);
+				callback(null, results);
+			}
+		});
+	}
+
+
+module.exports = {grabRecipes, deleteRecipe, addRecipe, showIngredients, deleteIngredient, addIngredient}
